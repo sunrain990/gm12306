@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>gm12306</title>
+    <script src="http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
+    <link href="http://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link href="http://cdn.bootcss.com/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+    <script src="http://cdn.bootcss.com/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="http://cdn.bootcss.com/magnific-popup.js/1.0.0/jquery.magnific-popup.min.js"></script>
+    <script src="http://cdn.bootcss.com/moment.js/2.10.6/moment.min.js"></script>
+    <script src="http://cdn.bootcss.com/angular.js/1.4.3/angular.min.js"></script>
+    <script src="js/gem.js"></script>
+    <script src="js/basics.js"></script>
+    <link rel="stylesheet" href="css/basics.css">
+</head>
+<body>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-3">
+            <p id="description"></p>
+            <p id="answer"></p>
+            <p id="notice" style="color: red"></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-3" style="float: right">
+            <button id="ans" class="btn btn-primary">提交</button>
+        </div>
+        <div class="col-md-3">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <img id='img6'>
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+    <div id="imgbox" style="margin: 0 auto">
+        <!--src="http://localhost:3000/generate/dragon2015-12-11-15-35-40.jpg"-->
+    </div>
+</body>
+<script>
+    $(function(bodye){
+        var arr = [];
+        function geneimg(){
+            $.ajax({
+                url:'/identify/code',
+                type:'POST',
+                dateType:"json",
+                success: function(msg) {
+                    var img6src = msg.data.outpath;
+                    $('#img6').attr('src',img6src);
+                    $('#description').html(msg.data.description);
+                },
+                error: function(msg) {}
+            });
+        };
+        geneimg();
+
+        $('#img6').click(function(e){
+            if(arr.length == 2){
+                arr=[];
+            }
+            var width = $('#img6').width();
+            var height = $('#img6').height();
+//            console.log(width,height, e.offsetX, e.offsetY, e.offsetTop, e.offsetLeft,e);
+            var x = e.offsetX;
+            var y = e.offsetY;
+            var id;
+            if(x<200&&y<200){
+                id=1;
+            }else if(x<200&&y>200&&y<400){
+                id=4;
+            }else if(x>200&&x<400&&y<200){
+                id=2;
+            }else if(x>200&&x<400&&y>200&&y<400){
+                id=5;
+            }else if(x>400&&y<200){
+                id=3;
+            }else if(x>400&&y>200&&y<400){
+                id=6;
+            }
+            console.log(id);
+            id = id-1;
+            arr.push(id);
+            var arrstr = JSON.stringify(arr);
+            $('#answer').html(arrstr);
+        });
+
+        $('#ans').click(function(e){
+            var picurl = $('#img6').attr('src');
+            function answer(){
+                $.ajax({
+                    url:'/identify/answer',
+                    type:'POST',
+                    data:{
+                        picurl:picurl,
+                        identifies:arr
+                    },
+                    dateType:"json",
+                    success: function(msg) {
+                        $('#notice').html(msg.msg);
+                    },
+                    error: function(msg) {}
+                });
+            };
+            answer();
+        });
+    });
+
+
+</script>
+</html>
